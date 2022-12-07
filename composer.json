@@ -1,0 +1,20 @@
+{
+    "name": "toastnz/simple-captcha",
+    "description": "A simple captcha spam protector",
+    "type": "silverstripe-vendormodule",
+    "keywords": ["silverstripe", "captcha", "forms", "spamprotection"],
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Leandro Palmieri",
+            "homepage": "https://toast.co.nz",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "ext-gd": "*",
+        "silverstripe/framework": "~4.0",
+        "silverstripe/vendor-plugin": "^1.0",
+        "silverstripe/spamprotection": "~3.0"
+    }
+}
