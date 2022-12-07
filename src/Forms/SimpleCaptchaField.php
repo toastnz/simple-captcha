@@ -30,7 +30,7 @@ class SimpleCaptchaField extends FormField
         
         $session->clear($this->challengeSessionName);
 
-        if ($captcha != $captchaResponse) {
+        if (!$captchaResponse || !$captcha || ($captcha != $captchaResponse)) {
             $validator->validationError($this->name, 'Invalid captcha response. Please try again.');
             return false;
         }
