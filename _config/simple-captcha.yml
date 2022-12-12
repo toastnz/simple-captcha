@@ -1,1 +1,15 @@
+---
+Name: SimpleCaptchaFieldConfig
+---
 
+Toast\SimpleCaptcha\Forms\SimpleCaptchaField:    
+    # characters to use to generate the challenge
+    challenge_characters: 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ123456789'
+    # challenge size
+    challenge_length: 6
+    # ideal between 18 and 25 (auto = random)
+    font_size: auto
+    # whether to ignore case when validation the challenge
+    ignore_case: false
+    # validation error message
+    validation_error_message: 'Invalid captcha response. Please try again.'

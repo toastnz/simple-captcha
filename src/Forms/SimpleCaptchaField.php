@@ -4,12 +4,25 @@ namespace Toast\SimpleCaptcha\Forms;
 use SilverStripe\Forms\FormField;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Injector\Injectable;
 
 class SimpleCaptchaField extends FormField 
 {
+    use Injectable;
     use Configurable;
+   
+    private static $challenge_characters;
+    
+    private static $challenge_length;
+
+    private static $font_size;
+
+    private static $ignore_case;
+
+    private static $validation_error_message;
 
     protected $challengeSessionName = 'SimpleCaptchaField_Challenge';
+
 
     public function __construct($name, $title = null, $value = null)
     {
@@ -26,12 +39,16 @@ class SimpleCaptchaField extends FormField
     {
         $session = Controller::curr()->getRequest()->getSession();
         $captcha = $session->get($this->challengeSessionName);
-        $captchaResponse = Controller::curr()->getRequest()->requestVar($this->getName());
-        
+        $captchaResponse = Controller::curr()->getRequest()->requestVar($this->getName());        
         $session->clear($this->challengeSessionName);
 
+        if ($this->config()->ignore_case) {
+            $captcha = strtolower($captcha);
+            $captchaResponse = strtolower($captchaResponse);
+        }
+
         if (!$captchaResponse || !$captcha || ($captcha != $captchaResponse)) {
-            $validator->validationError($this->name, 'Invalid captcha response. Please try again.');
+            $validator->validationError($this->name, $this->config()->validation_error_message);
             return false;
         }
 
@@ -40,7 +57,7 @@ class SimpleCaptchaField extends FormField
 
     public function getChallengeImage()
     {
-        $captcha = $this->getUID(6);
+        $captcha = $this->getUID($this->config()->challenge_length, $this->config()->challenge_characters);
         Controller::curr()->getRequest()->getSession()->set($this->challengeSessionName, $captcha);
 
         $width = 200;
@@ -50,7 +67,7 @@ class SimpleCaptchaField extends FormField
         $image = imagecreatetruecolor($width, $height); 
          
         // background colour
-        $bg = imagecolorallocate($image, 255, 255, 255);
+        $bg = imagecolorallocate($image, 240, 240, 240);
         imagefill($image, 0, 0, $bg);
 
         // background lines
@@ -64,7 +81,8 @@ class SimpleCaptchaField extends FormField
         // text
         for($c = 0; $c < strlen($captcha); $c++) {
             $color = imagecolorallocate($image, rand(0, 195), rand(0, 195), rand(0, 195));
-            imagettftext($image, rand(18, 25), rand(-30, 30), 10 + ($c * 30), rand(30, 50), $color, __DIR__ . '/../../fonts/arial.ttf', $captcha[$c]);
+            $fontSize = $this->config()->font_size == 'auto' ? rand(18, 25) : $this->config()->font_size;
+            imagettftext($image, $fontSize, rand(-30, 30), 10 + ($c * 30), rand(30, 50), $color, __DIR__ . '/../../fonts/arial.ttf', $captcha[$c]);
         }
 
         // output
@@ -79,10 +97,10 @@ class SimpleCaptchaField extends FormField
     }
 
 
-    private function getUID($size = 6)
+    private function getUID($size = 6, $chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ123456789')
     {
         $uid = '';
-        $str = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ123456789';
+        $str = $chars;
         for ($i = 0; $i < $size; $i++) {
             $uid .= substr($str, rand(0, strlen($str)), 1);
         }
